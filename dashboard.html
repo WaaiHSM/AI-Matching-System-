@@ -9,7 +9,7 @@
 :root{--bg:#101018;--fg:#fffaf3;--muted:rgba(255,250,243,.6);--line:rgba(255,255,255,.14);--a:#b8dcec;--b:#f4ccb1;--c:#b49ebe;--green:#1D9E75;--blue:#378ADD;--purple:#7F77DD;--orange:#D85A30}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;min-height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,sans-serif;font-size:15px}
-.app{max-width:1200px;margin:0 auto;padding:32px 24px 60px}
+.app{max-width:1240px;margin:0 auto;padding:32px 24px 80px}
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px}
 .header-left{display:grid;gap:4px}
 .htitle{font-size:22px;font-weight:300}
@@ -17,6 +17,7 @@ html,body{width:100%;min-height:100%;background:var(--bg);color:var(--fg);font-f
 .refresh-btn{padding:10px 20px;border-radius:999px;border:0.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:var(--fg);font-size:13px;cursor:pointer;transition:all .15s;backdrop-filter:blur(12px)}
 .refresh-btn:hover{background:rgba(255,255,255,.14)}
 .last-updated{font-size:11px;color:var(--muted);font-family:monospace}
+.section-title{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:28px 0 12px;padding-bottom:8px;border-bottom:0.5px solid rgba(255,255,255,.1)}
 .card{background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px var(--line),0 16px 44px rgba(0,0,0,.12);backdrop-filter:blur(20px);border-radius:16px;padding:20px}
 .summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .stat-card{border-radius:14px;padding:18px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px var(--line)}
@@ -25,9 +26,12 @@ html,body{width:100%;min-height:100%;background:var(--bg);color:var(--fg);font-f
 .stat-unit{font-size:.4em;opacity:.7;vertical-align:super}
 .stat-sub{font-size:11px;color:var(--muted);margin-top:6px}
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
 .chart-full{margin-bottom:16px}
 .card-title{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px}
 .chart-wrap{position:relative;width:100%;height:220px}
+.chart-wrap-lg{position:relative;width:100%;height:300px}
+.chart-wrap-sm{position:relative;width:100%;height:180px}
 .table-wrap{overflow-x:auto;margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead tr{border-bottom:0.5px solid rgba(255,255,255,.18)}
@@ -44,8 +48,14 @@ tbody tr:hover{background:rgba(255,255,255,.04)}
 .mtype-val{font-family:monospace;font-size:28px;font-weight:300;margin-bottom:4px}
 .mtype-name{font-size:12px;font-weight:500;margin-bottom:3px}
 .mtype-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.q-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.q-bar-label{font-size:11px;color:var(--muted);width:200px;flex-shrink:0;line-height:1.4}
+.q-bar-track{flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+.q-bar-fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.q-bar-val{font-family:monospace;font-size:11px;color:var(--fg);min-width:28px;text-align:right}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:720px){.summary-row{grid-template-columns:repeat(2,1fr)}.chart-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.summary-row{grid-template-columns:repeat(2,1fr)}.chart-grid,.chart-grid-3,.demo-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -60,18 +70,23 @@ tbody tr:hover{background:rgba(255,255,255,.04)}
       <button class="refresh-btn" onclick="loadData()">↺ 새로고침</button>
     </div>
   </div>
+
+  <!-- 1. 요약 -->
+  <div class="section-title">전체 요약</div>
   <div class="summary-row">
     <div class="stat-card"><div class="stat-label">총 응답 수</div><div class="stat-val" id="sTot">—</div><div class="stat-sub">명</div></div>
     <div class="stat-card"><div class="stat-label">평균 단계</div><div class="stat-val" id="sStep">—</div><div class="stat-sub">/ 5단계</div></div>
     <div class="stat-card"><div class="stat-label">평균 온도</div><div class="stat-val" id="sTemp">—<span class="stat-unit">°C</span></div><div class="stat-sub">/ 45°C</div></div>
     <div class="stat-card"><div class="stat-label">평균 매칭률</div><div class="stat-val" id="sMatch">—<span class="stat-unit">%</span></div><div class="stat-sub">AI 기준</div></div>
   </div>
+
+  <!-- 2. 감각설문 분포 -->
+  <div class="section-title">감각 설문 결과</div>
   <div class="chart-grid">
     <div class="card"><div class="card-title">단계 분포</div><div class="chart-wrap"><canvas id="stepChart"></canvas></div></div>
     <div class="card"><div class="card-title">온도 분포</div><div class="chart-wrap"><canvas id="tempChart"></canvas></div></div>
   </div>
   <div class="chart-grid">
-    <div class="card"><div class="card-title">사후설문 섹션별 평균</div><div class="chart-wrap"><canvas id="postChart"></canvas></div></div>
     <div class="card">
       <div class="card-title">만남 준비도 유형 분포</div>
       <div class="matrix">
@@ -81,26 +96,99 @@ tbody tr:hover{background:rgba(255,255,255,.04)}
         <div class="mtype"><div class="mtype-val" id="mt4v">—</div><div class="mtype-name">외압 반응형</div><div class="mtype-desc">내적 준비 低 / 외적 압력 高</div></div>
       </div>
     </div>
+    <div class="card"><div class="card-title">단계별 평균 온도</div><div class="chart-wrap"><canvas id="stepTempChart"></canvas></div></div>
   </div>
+
+  <!-- 3. 인적사항 교차분석 -->
+  <div class="section-title">인적사항 교차분석</div>
+  <div class="demo-grid">
+    <div class="card"><div class="card-title">성별 분포</div><div class="chart-wrap-sm"><canvas id="genderChart"></canvas></div></div>
+    <div class="card"><div class="card-title">연령대 분포</div><div class="chart-wrap-sm"><canvas id="ageChart"></canvas></div></div>
+  </div>
+  <div class="chart-grid">
+    <div class="card"><div class="card-title">성별 × 평균 단계/온도</div><div class="chart-wrap"><canvas id="genderStepChart"></canvas></div></div>
+    <div class="card"><div class="card-title">연령대 × 평균 단계/온도</div><div class="chart-wrap"><canvas id="ageStepChart"></canvas></div></div>
+  </div>
+
+  <!-- 4. 사후설문 섹션 분석 -->
+  <div class="section-title">사후설문 분석</div>
+  <div class="chart-grid">
+    <div class="card"><div class="card-title">섹션별 평균 (가로 막대)</div><div class="chart-wrap"><canvas id="postSecChart"></canvas></div></div>
+    <div class="card"><div class="card-title">섹션별 레이더</div><div class="chart-wrap"><canvas id="postRadarChart"></canvas></div></div>
+  </div>
+
+  <!-- 5. 문항별 개별 평균 -->
+  <div class="chart-full card">
+    <div class="card-title">25문항 개별 평균</div>
+    <div id="qBarArea"><div class="loading"><div class="spinner"></div><span>불러오는 중</span></div></div>
+  </div>
+
+  <!-- 6. 개별 응답 테이블 -->
+  <div class="section-title" style="margin-top:28px">개별 응답</div>
   <div class="card chart-full">
-    <div class="card-title">개별 응답</div>
     <div id="tableArea"><div class="loading"><div class="spinner"></div><span>데이터 불러오는 중</span></div></div>
   </div>
 </div>
+
 <script>
 const SHEETS_URL="https://script.google.com/macros/s/AKfycbwMY__NzLn1Gk1-15xCInuKcrt60EgPlPMbvb18ktCXu3qOFNWKOmDu7r6NXh2N9fqPXA/exec";
 const STEP_COLORS=["#378ADD","#7F77DD","#1D9E75","#f4ccb1","#D85A30"];
 const SEC_COLORS=["#378ADD","#7F77DD","#1D9E75","#D85A30"];
 const POST_REVERSE={10:true,16:true};
-const COL={timestamp:0,step:1,temp:2,match:3,score:4,sIds:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45],postStart:35};
+// post 시트 컬럼: timestamp(0) step(1) temp(2) gender(3) age(4) P1(5)..P25(29)
+const POST_COL={gender:3,age:4,pStart:5};
+// sensory 시트 컬럼: timestamp(0) step(1) temp(2) match(3) score(4) Q...(5~34)
+const SEN_COL={step:1,temp:2,match:3,score:4,sIds:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45]};
+
+// merged row 구조: timestamp(0) step(1) temp(2) match(3) score(4) Q*30(5~34) gender(35) age(36) P1~P25(37~61)
+const COL={step:1,temp:2,match:3,score:4,qStart:5,gender:35,age:36,pStart:37};
+
+const POST_SECS=[
+  {key:"A",label:"A. 사전설문 경험",color:"#378ADD",range:[1,5]},
+  {key:"B",label:"B. 비언어 피드백",color:"#7F77DD",range:[6,12]},
+  {key:"C",label:"C. AI 분석 인식",color:"#1D9E75",range:[13,18]},
+  {key:"D",label:"D. 매칭 경험",color:"#D85A30",range:[19,25]},
+];
+const POST_QS=[
+  {id:1,sec:"A",q:"사전 설문은 나의 성향이나 상태를 표현하기에 적절했다."},
+  {id:2,sec:"A",q:"질문이 너무 부담스럽거나 사적인 느낌은 아니었다."},
+  {id:3,sec:"A",q:"설문을 작성하면서 나를 어느 정도 돌아볼 수 있었다."},
+  {id:4,sec:"A",q:"설문 결과가 매칭에 사용된다는 점이 자연스럽게 느껴졌다."},
+  {id:5,sec:"A",q:"설문만으로 나를 판단받는다는 느낌은 크지 않았다."},
+  {id:6,sec:"B",q:"나의 상태를 색·온도로 전달받는 방식이 흥미로웠다."},
+  {id:7,sec:"B",q:"색·온도 표현은 수치보다 덜 부담스럽게 느껴졌다."},
+  {id:8,sec:"B",q:"비언어적 표현은 자유롭게 해석할 여지를 주었다."},
+  {id:9,sec:"B",q:"이 방식은 직접적으로 평가받는 느낌을 줄여주었다."},
+  {id:10,sec:"B",q:"색·온도 표현이 모호해서 오히려 불편했다. (역)",rev:true},
+  {id:11,sec:"B",q:"내 상태가 색이나 온도로 표현되는 것이 감각적으로 받아들여졌다."},
+  {id:12,sec:"B",q:"감각적 표현이 이 서비스와 더 잘 어울린다고 느꼈다."},
+  {id:13,sec:"C",q:"AI가 설문·인터뷰를 분석해 매칭한다는 점이 흥미로웠다."},
+  {id:14,sec:"C",q:"AI가 대화 내용을 녹음·분석한다는 점이 부담스럽지 않았다."},
+  {id:15,sec:"C",q:"녹음과 분석 목적이 명확히 설명된다면 수용할 수 있다."},
+  {id:16,sec:"C",q:"AI가 나를 분석한다는 점에서 감시받는 느낌이 들었다. (역)",rev:true},
+  {id:17,sec:"C",q:"AI 매칭은 사람이 직접 소개하는 방식보다 덜 부담스러웠다."},
+  {id:18,sec:"C",q:"AI가 나와 맞는 사람을 추천할 수 있다는 기대감이 생겼다."},
+  {id:19,sec:"D",q:"상대가 누구인지 모르는 상태에서 기다리는 과정이 흥미로웠다."},
+  {id:20,sec:"D",q:"상대를 처음 인식한 순간이 부담스럽지 않았다."},
+  {id:21,sec:"D",q:"이 만남은 소개팅보다 덜 직접적이고 편안하게 느껴졌다."},
+  {id:22,sec:"D",q:"대화가 어색해도 자연스럽게 지나갈 수 있는 구조라고 느꼈다."},
+  {id:23,sec:"D",q:"10분이라는 대화 시간은 적절했다."},
+  {id:24,sec:"D",q:"정해진 질문은 대화를 시작하는 데 도움이 되었다."},
+  {id:25,sec:"D",q:"이 서비스가 실제로 있다면 사용해볼 의향이 있다."},
+];
+
 let charts={};
+Chart.defaults.color="rgba(255,250,243,.5)";
 
 function loadData(){
   document.getElementById("lastUpdated").textContent="불러오는 중...";
-  const script=document.createElement("script");
-  script.src=SHEETS_URL+"?action=getData&callback=onData";
-  script.onerror=function(){showError("스크립트 로드 실패");};
-  document.head.appendChild(script);
+  const old=document.getElementById("_jsonp_script");
+  if(old)old.remove();
+  const s=document.createElement("script");
+  s.id="_jsonp_script";
+  s.src=SHEETS_URL+"?action=getData&callback=onData&t="+Date.now();
+  s.onerror=()=>showError("스크립트 로드 실패");
+  document.head.appendChild(s);
 }
 
 function onData(json){
@@ -114,82 +202,208 @@ function onData(json){
 
 function showEmpty(){
   document.getElementById("tableArea").innerHTML='<div class="empty">아직 응답 데이터가 없습니다.</div>';
+  document.getElementById("qBarArea").innerHTML='<div class="empty">데이터 없음</div>';
   ["sTot","sStep","sTemp","sMatch"].forEach(id=>document.getElementById(id).textContent="0");
 }
 function showError(err){
   document.getElementById("tableArea").innerHTML=`<div class="error">데이터를 불러오지 못했습니다.<br><small>${err}</small><br><br>Apps Script 재배포 후 다시 시도해보세요.</div>`;
   document.getElementById("lastUpdated").textContent="오류 발생";
 }
+
 function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
-function postScore(rawVal,qNum){const v=+rawVal||0;return POST_REVERSE[qNum]?(6-v):v;}
+function pScore(v,qNum){const n=+v||0;return POST_REVERSE[qNum]?(6-n):n;}
+function getPVal(row,qNum){return pScore(row[COL.pStart+qNum-1],qNum);}
 
 function renderAll(rows){
+  const n=rows.length;
   const steps=rows.map(r=>+r[COL.step]||0).filter(v=>v);
   const temps=rows.map(r=>+r[COL.temp]||0).filter(v=>v>=0);
   const matchs=rows.map(r=>+r[COL.match]||0).filter(v=>v);
-  document.getElementById("sTot").textContent=rows.length;
+
+  document.getElementById("sTot").textContent=n;
   document.getElementById("sStep").textContent=avg(steps).toFixed(1);
   document.getElementById("sTemp").innerHTML=avg(temps).toFixed(1)+'<span class="stat-unit">°C</span>';
   document.getElementById("sMatch").innerHTML=avg(matchs).toFixed(0)+'<span class="stat-unit">%</span>';
+
+  // 단계 분포
   const stepDist=[0,0,0,0,0];
   steps.forEach(s=>{if(s>=1&&s<=5)stepDist[s-1]++;});
-  renderStep(stepDist);
+  mkBar("stepChart",["1단계","2단계","3단계","4단계","5단계"],stepDist,STEP_COLORS);
+
+  // 온도 분포
   const tempBins=[0,0,0,0,0];
   temps.forEach(t=>{if(t<=9)tempBins[0]++;else if(t<=18)tempBins[1]++;else if(t<=27)tempBins[2]++;else if(t<=36)tempBins[3]++;else tempBins[4]++;});
-  renderTemp(tempBins);
-  const secRanges=[[1,5],[6,12],[13,18],[19,25]];
-  const secAvgs=secRanges.map(([start,end])=>{
-    const vals=[];
-    rows.forEach(row=>{for(let q=start;q<=end;q++){const v=postScore(row[COL.postStart+q-1],q);if(v>0)vals.push(v);}});
-    return avg(vals);
-  });
-  renderPost(secAvgs);
-  const sIds=COL.sIds;
-  function getSensQCol(qId){return 5+sIds.indexOf(qId);}
+  mkBar("tempChart",["0-9°C","10-18°C","19-27°C","28-36°C","37-45°C"],tempBins,["#b8dcec","#b8dcec","#f4ccb1","#f4ccb1","#D85A30"]);
+
+  // 준비도 유형
+  const sIds=SEN_COL.sIds;
+  function sensCol(qId){return 5+sIds.indexOf(qId);}
   const types={mt1:0,mt2:0,mt3:0,mt4:0};
   rows.forEach(row=>{
-    const innerIds=[14,15,8,1,10,12];
-    const innerVals=innerIds.map(id=>{const c=getSensQCol(id);return c>=0?(+row[c]||0):0;}).filter(v=>v>0);
-    const iAvg=avg(innerVals);
-    const q13col=getSensQCol(13);
-    const extRaw=q13col>=0?(+row[q13col]||2):2;
-    if(iAvg>=2&&extRaw<2)types.mt1++;
-    else if(iAvg>=2&&extRaw>=2)types.mt2++;
-    else if(iAvg<2&&extRaw<2)types.mt3++;
+    const iVals=[14,15,8,1,10,12].map(id=>{const c=sensCol(id);return c>=0?(+row[c]||0):0;}).filter(v=>v>0);
+    const iAvg=avg(iVals);
+    const ext=+row[sensCol(13)]||2;
+    if(iAvg>=2&&ext<2)types.mt1++;
+    else if(iAvg>=2&&ext>=2)types.mt2++;
+    else if(iAvg<2&&ext<2)types.mt3++;
     else types.mt4++;
   });
-  ["mt1","mt2","mt3","mt4"].forEach(k=>{document.getElementById(k+"v").textContent=types[k]+"명";});
+  ["mt1","mt2","mt3","mt4"].forEach(k=>document.getElementById(k+"v").textContent=types[k]+"명");
+
+  // 단계별 평균 온도
+  const stByStep=[[],[],[],[],[]];
+  rows.forEach(r=>{const s=+r[COL.step];const t=+r[COL.temp];if(s>=1&&s<=5&&t>=0)stByStep[s-1].push(t);});
+  mkBar("stepTempChart",["1단계","2단계","3단계","4단계","5단계"],stByStep.map(a=>avg(a)||null),STEP_COLORS,{yLabel:"°C",min:0,max:45});
+
+  // 인적사항
+  renderDemographic(rows);
+
+  // 사후설문 섹션
+  const secAvgs=POST_SECS.map(sec=>{
+    const vals=[];
+    rows.forEach(row=>{
+      for(let q=sec.range[0];q<=sec.range[1];q++){const v=getPVal(row,q);if(v>0)vals.push(v);}
+    });
+    return avg(vals);
+  });
+  mkBarH("postSecChart",POST_SECS.map(s=>s.label),secAvgs,POST_SECS.map(s=>s.color),{min:1,max:5});
+  mkRadar("postRadarChart",POST_SECS.map(s=>s.key),secAvgs,POST_SECS.map(s=>s.color));
+
+  // 문항별 평균
+  renderQBars(rows);
+
+  // 테이블
   renderTable(rows);
 }
 
-function renderStep(dist){
-  if(charts.step)charts.step.destroy();
-  const ctx=document.getElementById("stepChart").getContext("2d");
-  charts.step=new Chart(ctx,{type:"bar",data:{labels:["1단계","2단계","3단계","4단계","5단계"],datasets:[{data:dist,backgroundColor:STEP_COLORS.map(c=>c+"99"),borderColor:STEP_COLORS,borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11},stepSize:1},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}}}});
+function renderDemographic(rows){
+  // 성별 분포
+  const gCount={};
+  rows.forEach(r=>{const g=r[COL.gender]||"미입력";gCount[g]=(gCount[g]||0)+1;});
+  const gLabels=Object.keys(gCount),gData=gLabels.map(k=>gCount[k]);
+  mkDoughnut("genderChart",gLabels,gData,["#378ADD","#f4ccb1","#b49ebe","rgba(255,255,255,.3)"]);
+
+  // 연령대 분포
+  const aCount={};
+  rows.forEach(r=>{const a=r[COL.age]||"미입력";aCount[a]=(aCount[a]||0)+1;});
+  const aLabels=["20대 초반","20대 후반","30대 초반","30대 후반","40대 이상","미입력"].filter(k=>aCount[k]);
+  mkDoughnut("ageChart",aLabels,aLabels.map(k=>aCount[k]||0),["#378ADD","#7F77DD","#1D9E75","#f4ccb1","#D85A30","rgba(255,255,255,.3)"]);
+
+  // 성별 × 단계/온도
+  const gGroups={};
+  rows.forEach(r=>{const g=r[COL.gender]||"미입력";if(!gGroups[g])gGroups[g]={steps:[],temps:[]};const s=+r[COL.step];const t=+r[COL.temp];if(s)gGroups[g].steps.push(s);if(t>=0)gGroups[g].temps.push(t);});
+  const gk=Object.keys(gGroups);
+  mkGroupedBar("genderStepChart",gk,[
+    {label:"평균 단계",data:gk.map(k=>+avg(gGroups[k].steps).toFixed(2)),color:"#378ADD"},
+    {label:"평균 온도÷9",data:gk.map(k=>+(avg(gGroups[k].temps)/9).toFixed(2)),color:"#f4ccb1"},
+  ]);
+
+  // 연령대 × 단계/온도
+  const aGroups={};
+  rows.forEach(r=>{const a=r[COL.age]||"미입력";if(!aGroups[a])aGroups[a]={steps:[],temps:[]};const s=+r[COL.step];const t=+r[COL.temp];if(s)aGroups[a].steps.push(s);if(t>=0)aGroups[a].temps.push(t);});
+  const orderedAges=["20대 초반","20대 후반","30대 초반","30대 후반","40대 이상","미입력"].filter(k=>aGroups[k]);
+  mkGroupedBar("ageStepChart",orderedAges,[
+    {label:"평균 단계",data:orderedAges.map(k=>+avg(aGroups[k].steps).toFixed(2)),color:"#378ADD"},
+    {label:"평균 온도÷9",data:orderedAges.map(k=>+(avg(aGroups[k].temps)/9).toFixed(2)),color:"#f4ccb1"},
+  ]);
 }
-function renderTemp(bins){
-  if(charts.temp)charts.temp.destroy();
-  const ctx=document.getElementById("tempChart").getContext("2d");
-  charts.temp=new Chart(ctx,{type:"bar",data:{labels:["0-9","10-18","19-27","28-36","37-45"],datasets:[{data:bins,backgroundColor:["#b8dcec99","#b8dcec99","#f4ccb199","#f4ccb199","#D85A3099"],borderColor:["#b8dcec","#b8dcec","#f4ccb1","#f4ccb1","#D85A30"],borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:10}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11},stepSize:1},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}}}});
+
+function renderQBars(rows){
+  const secColorMap={A:"#378ADD",B:"#7F77DD",C:"#1D9E75",D:"#D85A30"};
+  const html=POST_SECS.map(sec=>{
+    const qs=POST_QS.filter(q=>q.sec===sec.key);
+    const barsHtml=qs.map(q=>{
+      const vals=rows.map(r=>getPVal(r,q.id)).filter(v=>v>0);
+      const a=avg(vals);
+      const pct=((a-1)/4*100).toFixed(0);
+      return `<div class="q-bar-row">
+        <div class="q-bar-label">Q${q.id}. ${q.q}</div>
+        <div class="q-bar-track"><div class="q-bar-fill" style="width:${pct}%;background:${sec.color}99"></div></div>
+        <div class="q-bar-val">${a>0?a.toFixed(2):"—"}</div>
+      </div>`;
+    }).join("");
+    return `<div style="margin-bottom:20px"><div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:${sec.color};margin-bottom:10px">${sec.label}</div>${barsHtml}</div>`;
+  }).join("");
+  document.getElementById("qBarArea").innerHTML=html;
 }
-function renderPost(avgs){
-  if(charts.post)charts.post.destroy();
-  const ctx=document.getElementById("postChart").getContext("2d");
-  charts.post=new Chart(ctx,{type:"bar",data:{labels:["A. 사전설문","B. 비언어","C. AI분석","D. 매칭"],datasets:[{data:avgs.map(v=>+v.toFixed(2)),backgroundColor:SEC_COLORS.map(c=>c+"99"),borderColor:SEC_COLORS,borderWidth:1,borderRadius:6}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:1,max:5,ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{display:false}}}}});
+
+// ── 차트 헬퍼 ─────────────────────────────────────
+const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}}};
+
+function mkBar(id,labels,data,colors,opts={}){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id).getContext("2d");
+  const colArr=Array.isArray(colors)?colors:[colors];
+  const o=JSON.parse(JSON.stringify(baseOpts));
+  if(opts.yLabel)o.scales.y.title={display:false};
+  if(opts.min!=null)o.scales.y.min=opts.min;
+  if(opts.max!=null)o.scales.y.max=opts.max;
+  charts[id]=new Chart(ctx,{type:"bar",data:{labels,datasets:[{data,backgroundColor:colArr.map(c=>c+"99"),borderColor:colArr,borderWidth:1,borderRadius:6}]},options:o});
 }
+
+function mkBarH(id,labels,data,colors,opts={}){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id).getContext("2d");
+  const o=JSON.parse(JSON.stringify(baseOpts));
+  o.indexAxis="y";
+  if(opts.min!=null)o.scales.x={...o.scales.x,min:opts.min};
+  if(opts.max!=null)o.scales.x={...o.scales.x,max:opts.max};
+  charts[id]=new Chart(ctx,{type:"bar",data:{labels,datasets:[{data:data.map(v=>+v.toFixed(2)),backgroundColor:colors.map(c=>c+"99"),borderColor:colors,borderWidth:1,borderRadius:6}]},options:o});
+}
+
+function mkGroupedBar(id,labels,datasets){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id).getContext("2d");
+  const o=JSON.parse(JSON.stringify(baseOpts));
+  o.plugins.legend={display:true,labels:{color:"rgba(255,250,243,.6)",font:{size:11}}};
+  o.scales.y.max=5;
+  charts[id]=new Chart(ctx,{type:"bar",data:{labels,datasets:datasets.map(d=>({label:d.label,data:d.data,backgroundColor:d.color+"99",borderColor:d.color,borderWidth:1,borderRadius:4}))},options:o});
+}
+
+function mkDoughnut(id,labels,data,colors){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id).getContext("2d");
+  charts[id]=new Chart(ctx,{type:"doughnut",data:{labels,datasets:[{data,backgroundColor:colors.map(c=>c+"cc"),borderColor:colors,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"right",labels:{color:"rgba(255,250,243,.6)",font:{size:11},boxWidth:12}}}}});
+}
+
+function mkRadar(id,labels,data,colors){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id).getContext("2d");
+  charts[id]=new Chart(ctx,{type:"radar",data:{labels,datasets:[{data,backgroundColor:"rgba(244,204,177,.18)",borderColor:"#f4ccb1",borderWidth:2,pointBackgroundColor:colors,pointRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{min:1,max:5,ticks:{color:"rgba(255,250,243,.4)",backdropColor:"transparent",stepSize:1},grid:{color:"rgba(255,255,255,.1)"},pointLabels:{color:"rgba(255,250,243,.7)",font:{size:12}}}}}});
+}
+
 function stepBadgeColor(s){return["#378ADD","#7F77DD","#1D9E75","#f0b87a","#D85A30"][s-1]||"#aaa";}
+
 function renderTable(rows){
   if(!rows.length){document.getElementById("tableArea").innerHTML='<div class="empty">아직 응답 데이터가 없습니다.</div>';return;}
-  const html=`<div class="table-wrap"><table><thead><tr><th>#</th><th>시각</th><th>단계</th><th>온도</th><th>매칭률</th><th>점수</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead><tbody>${rows.map((row,i)=>{
-    const step=+row[1]||0,temp=+row[2]||0,match=+row[3]||0,score=+row[4]||0;
-    const ts=row[0]?new Date(row[0]).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
-    const c=stepBadgeColor(step);
-    function secAvg(start,end){const vals=[];for(let q=start;q<=end;q++){const v=postScore(row[COL.postStart+q-1],q);if(v>0)vals.push(v);}return vals.length?avg(vals).toFixed(1):"—";}
-    return `<tr><td style="color:rgba(255,250,243,.4);font-family:monospace">${i+1}</td><td style="color:rgba(255,250,243,.5);font-size:11px">${ts}</td><td><span class="badge" style="background:${c}22;color:${c}">${step}단계</span></td><td style="font-family:monospace">${temp}°C</td><td style="font-family:monospace">${match}%</td><td style="font-family:monospace;color:rgba(255,250,243,.5)">${score}</td><td style="font-family:monospace">${secAvg(1,5)}</td><td style="font-family:monospace">${secAvg(6,12)}</td><td style="font-family:monospace">${secAvg(13,18)}</td><td style="font-family:monospace">${secAvg(19,25)}</td></tr>`;
-  }).join("")}</tbody></table></div>`;
+  const html=`<div class="table-wrap"><table>
+    <thead><tr>
+      <th>#</th><th>시각</th><th>성별</th><th>연령대</th><th>단계</th><th>온도</th><th>매칭률</th><th>A 사전설문</th><th>B 비언어</th><th>C AI분석</th><th>D 매칭</th>
+    </tr></thead>
+    <tbody>${rows.map((row,i)=>{
+      const step=+row[COL.step]||0,temp=+row[COL.temp]||0,match=+row[COL.match]||0;
+      const ts=row[0]?new Date(row[0]).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
+      const c=stepBadgeColor(step);
+      const gender=row[COL.gender]||"—";
+      const age=row[COL.age]||"—";
+      function sAvg(s,e){const v=[];for(let q=s;q<=e;q++){const pv=getPVal(row,q);if(pv>0)v.push(pv);}return v.length?avg(v).toFixed(1):"—";}
+      return `<tr>
+        <td style="color:rgba(255,250,243,.4);font-family:monospace">${i+1}</td>
+        <td style="color:rgba(255,250,243,.5);font-size:11px">${ts}</td>
+        <td style="font-size:12px">${gender}</td>
+        <td style="font-size:12px">${age}</td>
+        <td><span class="badge" style="background:${c}22;color:${c}">${step}단계</span></td>
+        <td style="font-family:monospace">${temp}°C</td>
+        <td style="font-family:monospace">${match}%</td>
+        <td style="font-family:monospace">${sAvg(1,5)}</td>
+        <td style="font-family:monospace">${sAvg(6,12)}</td>
+        <td style="font-family:monospace">${sAvg(13,18)}</td>
+        <td style="font-family:monospace">${sAvg(19,25)}</td>
+      </tr>`;
+    }).join("")}</tbody></table></div>`;
   document.getElementById("tableArea").innerHTML=html;
 }
-Chart.defaults.color="rgba(255,250,243,.5)";
+
 loadData();
 </script>
 </body>

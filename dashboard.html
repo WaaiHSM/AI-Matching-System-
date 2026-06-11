@@ -74,7 +74,7 @@ tbody tr:hover{background:rgba(255,255,255,.04)}
     <div class="card"><div class="card-title">사후설문 섹션별 평균</div><div class="chart-wrap"><canvas id="postChart"></canvas></div></div>
     <div class="card">
       <div class="card-title">만남 준비도 유형 분포</div>
-      <div class="matrix" id="matrixView">
+      <div class="matrix">
         <div class="mtype"><div class="mtype-val" id="mt1v">—</div><div class="mtype-name">자발적 준비형</div><div class="mtype-desc">내적 준비 高 / 외적 압력 低</div></div>
         <div class="mtype"><div class="mtype-val" id="mt2v">—</div><div class="mtype-name">복합 동기형</div><div class="mtype-desc">내적 준비 高 / 외적 압력 高</div></div>
         <div class="mtype"><div class="mtype-val" id="mt3v">—</div><div class="mtype-name">충전 필요형</div><div class="mtype-desc">내적 준비 低 / 외적 압력 低</div></div>
@@ -95,11 +95,16 @@ const POST_REVERSE={10:true,16:true};
 const COL={timestamp:0,step:1,temp:2,match:3,score:4,sIds:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45],postStart:35};
 let charts={};
 
-async function loadData(){
+function loadData(){
   document.getElementById("lastUpdated").textContent="불러오는 중...";
+  const script=document.createElement("script");
+  script.src=SHEETS_URL+"?action=getData&callback=onData";
+  script.onerror=function(){showError("스크립트 로드 실패");};
+  document.head.appendChild(script);
+}
+
+function onData(json){
   try{
-    const res=await fetch(SHEETS_URL+"?action=getData");
-    const json=await res.json();
     if(json.status!=="ok"||!json.data||json.data.length<2){showEmpty();return;}
     const rows=json.data.slice(1);
     renderAll(rows);
@@ -145,13 +150,12 @@ function renderAll(rows){
   rows.forEach(row=>{
     const innerIds=[14,15,8,1,10,12];
     const innerVals=innerIds.map(id=>{const c=getSensQCol(id);return c>=0?(+row[c]||0):0;}).filter(v=>v>0);
-    const innerAvg=avg(innerVals);
+    const iAvg=avg(innerVals);
     const q13col=getSensQCol(13);
-    const externalRaw=q13col>=0?(+row[q13col]||2):2;
-    const innerHigh=innerAvg>=2,externalHigh=externalRaw>=2;
-    if(innerHigh&&!externalHigh)types.mt1++;
-    else if(innerHigh&&externalHigh)types.mt2++;
-    else if(!innerHigh&&!externalHigh)types.mt3++;
+    const extRaw=q13col>=0?(+row[q13col]||2):2;
+    if(iAvg>=2&&extRaw<2)types.mt1++;
+    else if(iAvg>=2&&extRaw>=2)types.mt2++;
+    else if(iAvg<2&&extRaw<2)types.mt3++;
     else types.mt4++;
   });
   ["mt1","mt2","mt3","mt4"].forEach(k=>{document.getElementById(k+"v").textContent=types[k]+"명";});
@@ -166,17 +170,17 @@ function renderStep(dist){
 function renderTemp(bins){
   if(charts.temp)charts.temp.destroy();
   const ctx=document.getElementById("tempChart").getContext("2d");
-  charts.temp=new Chart(ctx,{type:"bar",data:{labels:["0–9°C","10–18°C","19–27°C","28–36°C","37–45°C"],datasets:[{data:bins,backgroundColor:["#b8dcec99","#b8dcec99","#f4ccb199","#f4ccb199","#D85A3099"],borderColor:["#b8dcec","#b8dcec","#f4ccb1","#f4ccb1","#D85A30"],borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:10}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11},stepSize:1},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}}}});
+  charts.temp=new Chart(ctx,{type:"bar",data:{labels:["0-9","10-18","19-27","28-36","37-45"],datasets:[{data:bins,backgroundColor:["#b8dcec99","#b8dcec99","#f4ccb199","#f4ccb199","#D85A3099"],borderColor:["#b8dcec","#b8dcec","#f4ccb1","#f4ccb1","#D85A30"],borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:10}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11},stepSize:1},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}}}});
 }
 function renderPost(avgs){
   if(charts.post)charts.post.destroy();
   const ctx=document.getElementById("postChart").getContext("2d");
-  charts.post=new Chart(ctx,{type:"bar",data:{labels:["A. 사전설문 경험","B. 비언어 피드백","C. AI 분석 인식","D. 매칭 경험"],datasets:[{data:avgs.map(v=>+v.toFixed(2)),backgroundColor:SEC_COLORS.map(c=>c+"99"),borderColor:SEC_COLORS,borderWidth:1,borderRadius:6}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:1,max:5,ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{display:false}}}}});
+  charts.post=new Chart(ctx,{type:"bar",data:{labels:["A. 사전설문","B. 비언어","C. AI분석","D. 매칭"],datasets:[{data:avgs.map(v=>+v.toFixed(2)),backgroundColor:SEC_COLORS.map(c=>c+"99"),borderColor:SEC_COLORS,borderWidth:1,borderRadius:6}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:1,max:5,ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{display:false}}}}});
 }
 function stepBadgeColor(s){return["#378ADD","#7F77DD","#1D9E75","#f0b87a","#D85A30"][s-1]||"#aaa";}
 function renderTable(rows){
   if(!rows.length){document.getElementById("tableArea").innerHTML='<div class="empty">아직 응답 데이터가 없습니다.</div>';return;}
-  const html=`<div class="table-wrap"><table><thead><tr><th>#</th><th>시각</th><th>단계</th><th>온도</th><th>매칭률</th><th>점수</th><th>A 사전설문</th><th>B 비언어</th><th>C AI분석</th><th>D 매칭</th></tr></thead><tbody>${rows.map((row,i)=>{
+  const html=`<div class="table-wrap"><table><thead><tr><th>#</th><th>시각</th><th>단계</th><th>온도</th><th>매칭률</th><th>점수</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead><tbody>${rows.map((row,i)=>{
     const step=+row[1]||0,temp=+row[2]||0,match=+row[3]||0,score=+row[4]||0;
     const ts=row[0]?new Date(row[0]).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
     const c=stepBadgeColor(step);

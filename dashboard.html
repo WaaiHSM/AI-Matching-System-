@@ -279,13 +279,13 @@ function renderAll(rows){
 function renderDemographic(rows){
   // 성별 분포
   const gCount={};
-  rows.forEach(r=>{const g=r[COL.gender]||"미입력";gCount[g]=(gCount[g]||0)+1;});
+  rows.forEach(r=>{const g=(r[COL.gender]||"").trim()||"미입력";gCount[g]=(gCount[g]||0)+1;});
   const gLabels=Object.keys(gCount),gData=gLabels.map(k=>gCount[k]);
   mkDoughnut("genderChart",gLabels,gData,["#378ADD","#f4ccb1","#b49ebe","rgba(255,255,255,.3)"]);
 
   // 연령대 분포
   const aCount={};
-  rows.forEach(r=>{const a=r[COL.age]||"미입력";aCount[a]=(aCount[a]||0)+1;});
+  rows.forEach(r=>{const a=(r[COL.age]||"").trim()||"미입력";aCount[a]=(aCount[a]||0)+1;});
   const aLabels=["10대","20대","30대","40대","50대 이상","미입력"].filter(k=>aCount[k]);
   mkDoughnut("ageChart",aLabels,aLabels.map(k=>aCount[k]||0),["#378ADD","#7F77DD","#1D9E75","#f4ccb1","#D85A30","rgba(255,255,255,.3)"]);
 
@@ -300,7 +300,7 @@ function renderDemographic(rows){
 
   // 연령대 × 단계/온도
   const aGroups={};
-  rows.forEach(r=>{const a=r[COL.age]||"미입력";if(!aGroups[a])aGroups[a]={steps:[],temps:[]};const s=+r[COL.step];const t=+r[COL.temp];if(s)aGroups[a].steps.push(s);if(t>=0)aGroups[a].temps.push(t);});
+  rows.forEach(r=>{const a=(r[COL.age]||"").trim()||"미입력";if(!aGroups[a])aGroups[a]={steps:[],temps:[]};const s=+r[COL.step];const t=+r[COL.temp];if(s)aGroups[a].steps.push(s);if(t>=0)aGroups[a].temps.push(t);});
   const orderedAges=["10대","20대","30대","40대","50대 이상","미입력"].filter(k=>aGroups[k]);
   mkGroupedBar("ageStepChart",orderedAges,[
     {label:"평균 단계",data:orderedAges.map(k=>+avg(aGroups[k].steps).toFixed(2)),color:"#378ADD"},

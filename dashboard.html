@@ -10,8 +10,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;min-height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,sans-serif;font-size:15px}
 .app{max-width:1200px;margin:0 auto;padding:32px 24px 60px}
-
-/* header */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px}
 .header-left{display:grid;gap:4px}
 .htitle{font-size:22px;font-weight:300}
@@ -19,25 +17,17 @@ html,body{width:100%;min-height:100%;background:var(--bg);color:var(--fg);font-f
 .refresh-btn{padding:10px 20px;border-radius:999px;border:0.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:var(--fg);font-size:13px;cursor:pointer;transition:all .15s;backdrop-filter:blur(12px)}
 .refresh-btn:hover{background:rgba(255,255,255,.14)}
 .last-updated{font-size:11px;color:var(--muted);font-family:monospace}
-
-/* glass card */
 .card{background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px var(--line),0 16px 44px rgba(0,0,0,.12);backdrop-filter:blur(20px);border-radius:16px;padding:20px}
-
-/* summary row */
 .summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .stat-card{border-radius:14px;padding:18px;background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px var(--line)}
 .stat-label{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
 .stat-val{font-family:monospace;font-size:clamp(28px,4vw,42px);font-weight:300;line-height:1}
 .stat-unit{font-size:.4em;opacity:.7;vertical-align:super}
 .stat-sub{font-size:11px;color:var(--muted);margin-top:6px}
-
-/* chart grid */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 .chart-full{margin-bottom:16px}
 .card-title{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px}
 .chart-wrap{position:relative;width:100%;height:220px}
-
-/* table */
 .table-wrap{overflow-x:auto;margin-top:12px}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead tr{border-bottom:0.5px solid rgba(255,255,255,.18)}
@@ -45,20 +35,15 @@ th{padding:8px 12px;text-align:left;font-size:10px;color:var(--muted);letter-spa
 td{padding:8px 12px;border-bottom:0.5px solid rgba(255,255,255,.07);white-space:nowrap}
 tbody tr:hover{background:rgba(255,255,255,.04)}
 .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-family:monospace}
-
-/* state screens */
 .loading{display:flex;align-items:center;justify-content:center;height:320px;flex-direction:column;gap:14px;color:var(--muted)}
 .spinner{width:32px;height:32px;border:2px solid rgba(255,255,255,.1);border-top-color:var(--a);border-radius:50%;animation:spin .8s linear infinite}
 .empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px}
 .error{text-align:center;padding:48px 24px;color:var(--orange);font-size:13px;line-height:1.7}
-
-/* type matrix */
 .matrix{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
 .mtype{border-radius:12px;padding:14px;border:0.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
 .mtype-val{font-family:monospace;font-size:28px;font-weight:300;margin-bottom:4px}
 .mtype-name{font-size:12px;font-weight:500;margin-bottom:3px}
 .mtype-desc{font-size:11px;color:var(--muted);line-height:1.5}
-
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:720px){.summary-row{grid-template-columns:repeat(2,1fr)}.chart-grid{grid-template-columns:1fr}}
 </style>
@@ -75,310 +60,132 @@ tbody tr:hover{background:rgba(255,255,255,.04)}
       <button class="refresh-btn" onclick="loadData()">↺ 새로고침</button>
     </div>
   </div>
-
-  <!-- 요약 -->
   <div class="summary-row">
     <div class="stat-card"><div class="stat-label">총 응답 수</div><div class="stat-val" id="sTot">—</div><div class="stat-sub">명</div></div>
     <div class="stat-card"><div class="stat-label">평균 단계</div><div class="stat-val" id="sStep">—</div><div class="stat-sub">/ 5단계</div></div>
     <div class="stat-card"><div class="stat-label">평균 온도</div><div class="stat-val" id="sTemp">—<span class="stat-unit">°C</span></div><div class="stat-sub">/ 45°C</div></div>
     <div class="stat-card"><div class="stat-label">평균 매칭률</div><div class="stat-val" id="sMatch">—<span class="stat-unit">%</span></div><div class="stat-sub">AI 기준</div></div>
   </div>
-
-  <!-- 차트 2열 -->
   <div class="chart-grid">
-    <div class="card">
-      <div class="card-title">단계 분포</div>
-      <div class="chart-wrap"><canvas id="stepChart"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">온도 분포</div>
-      <div class="chart-wrap"><canvas id="tempChart"></canvas></div>
-    </div>
+    <div class="card"><div class="card-title">단계 분포</div><div class="chart-wrap"><canvas id="stepChart"></canvas></div></div>
+    <div class="card"><div class="card-title">온도 분포</div><div class="chart-wrap"><canvas id="tempChart"></canvas></div></div>
   </div>
-
   <div class="chart-grid">
-    <div class="card">
-      <div class="card-title">사후설문 섹션별 평균</div>
-      <div class="chart-wrap"><canvas id="postChart"></canvas></div>
-    </div>
+    <div class="card"><div class="card-title">사후설문 섹션별 평균</div><div class="chart-wrap"><canvas id="postChart"></canvas></div></div>
     <div class="card">
       <div class="card-title">만남 준비도 유형 분포</div>
       <div class="matrix" id="matrixView">
-        <div class="mtype" id="mt1"><div class="mtype-val" id="mt1v">—</div><div class="mtype-name">자발적 준비형</div><div class="mtype-desc">내적 준비 高 / 외적 압력 低</div></div>
-        <div class="mtype" id="mt2"><div class="mtype-val" id="mt2v">—</div><div class="mtype-name">복합 동기형</div><div class="mtype-desc">내적 준비 高 / 외적 압력 高</div></div>
-        <div class="mtype" id="mt3"><div class="mtype-val" id="mt3v">—</div><div class="mtype-name">충전 필요형</div><div class="mtype-desc">내적 준비 低 / 외적 압력 低</div></div>
-        <div class="mtype" id="mt4"><div class="mtype-val" id="mt4v">—</div><div class="mtype-name">외압 반응형</div><div class="mtype-desc">내적 준비 低 / 외적 압력 高</div></div>
+        <div class="mtype"><div class="mtype-val" id="mt1v">—</div><div class="mtype-name">자발적 준비형</div><div class="mtype-desc">내적 준비 高 / 외적 압력 低</div></div>
+        <div class="mtype"><div class="mtype-val" id="mt2v">—</div><div class="mtype-name">복합 동기형</div><div class="mtype-desc">내적 준비 高 / 외적 압력 高</div></div>
+        <div class="mtype"><div class="mtype-val" id="mt3v">—</div><div class="mtype-name">충전 필요형</div><div class="mtype-desc">내적 준비 低 / 외적 압력 低</div></div>
+        <div class="mtype"><div class="mtype-val" id="mt4v">—</div><div class="mtype-name">외압 반응형</div><div class="mtype-desc">내적 준비 低 / 외적 압력 高</div></div>
       </div>
     </div>
   </div>
-
-  <!-- 개별 응답 테이블 -->
   <div class="card chart-full">
     <div class="card-title">개별 응답</div>
     <div id="tableArea"><div class="loading"><div class="spinner"></div><span>데이터 불러오는 중</span></div></div>
   </div>
 </div>
-
 <script>
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbwkJog1LaI8Hb5bN8ZT_sDlb6mOf3_uPhg3zrQCZHcuSnCO-dwu_hcJ6af9g4MiGkaVdA/exec";
-const STEP_COLORS = ["#378ADD","#7F77DD","#1D9E75","#f4ccb1","#D85A30"];
-const SEC_COLORS  = ["#378ADD","#7F77DD","#1D9E75","#D85A30"];
-const POST_REVERSE = {10:true, 16:true};
+const SHEETS_URL="https://script.google.com/macros/s/AKfycbzJuB49IgBR-nLeN3MCY5Kq9f137IRAlTtbFTnY6o5VSRqafP_KNGZSnMud4BXfrzofAg/exec";
+const STEP_COLORS=["#378ADD","#7F77DD","#1D9E75","#f4ccb1","#D85A30"];
+const SEC_COLORS=["#378ADD","#7F77DD","#1D9E75","#D85A30"];
+const POST_REVERSE={10:true,16:true};
+const COL={timestamp:0,step:1,temp:2,match:3,score:4,sIds:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45],postStart:35};
+let charts={};
 
-// 컬럼 인덱스 매핑
-const COL = {
-  timestamp:0, step:1, temp:2, match:3, score:4,
-  // 감각 Q (5~34): IDs [1~15, 31~45]
-  sIds:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45],
-  // 사후 Q (35~59): 사후_Q1 ~ 사후_Q25
-  postStart: 35
-};
-
-let charts = {};
-
-async function loadData() {
-  document.getElementById("lastUpdated").textContent = "불러오는 중...";
-  try {
-    const res = await fetch(SHEETS_URL + "?action=getData");
-    const json = await res.json();
-    if (json.status !== "ok" || !json.data || json.data.length < 2) {
-      showEmpty(); return;
-    }
-    const rows = json.data.slice(1); // 헤더 제외
+async function loadData(){
+  document.getElementById("lastUpdated").textContent="불러오는 중...";
+  try{
+    const res=await fetch(SHEETS_URL+"?action=getData");
+    const json=await res.json();
+    if(json.status!=="ok"||!json.data||json.data.length<2){showEmpty();return;}
+    const rows=json.data.slice(1);
     renderAll(rows);
-    document.getElementById("lastUpdated").textContent =
-      "마지막 업데이트 " + new Date().toLocaleTimeString("ko-KR");
-  } catch(err) {
-    showError(err);
-  }
+    document.getElementById("lastUpdated").textContent="마지막 업데이트 "+new Date().toLocaleTimeString("ko-KR");
+  }catch(err){showError(err);}
 }
 
-function showEmpty() {
-  document.getElementById("tableArea").innerHTML =
-    '<div class="empty">아직 응답 데이터가 없습니다.</div>';
-  ["sTot","sStep","sTemp","sMatch"].forEach(id => document.getElementById(id).textContent = "0");
+function showEmpty(){
+  document.getElementById("tableArea").innerHTML='<div class="empty">아직 응답 데이터가 없습니다.</div>';
+  ["sTot","sStep","sTemp","sMatch"].forEach(id=>document.getElementById(id).textContent="0");
 }
-
-function showError(err) {
-  document.getElementById("tableArea").innerHTML =
-    `<div class="error">데이터를 불러오지 못했습니다.<br><small>${err}</small><br><br>Apps Script 재배포 후 다시 시도해보세요.</div>`;
-  document.getElementById("lastUpdated").textContent = "오류 발생";
+function showError(err){
+  document.getElementById("tableArea").innerHTML=`<div class="error">데이터를 불러오지 못했습니다.<br><small>${err}</small><br><br>Apps Script 재배포 후 다시 시도해보세요.</div>`;
+  document.getElementById("lastUpdated").textContent="오류 발생";
 }
+function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
+function postScore(rawVal,qNum){const v=+rawVal||0;return POST_REVERSE[qNum]?(6-v):v;}
 
-function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
-function clamp(v,a,b){ return Math.min(b,Math.max(a,v)); }
-
-function postScore(rawVal, qNum) {
-  const v = +rawVal || 0;
-  return POST_REVERSE[qNum] ? (6 - v) : v;
-}
-
-function renderAll(rows) {
-  const n = rows.length;
-
-  // 기본 수치
-  const steps  = rows.map(r => +r[COL.step]||0).filter(v=>v);
-  const temps  = rows.map(r => +r[COL.temp]||0).filter(v=>v>=0);
-  const matchs = rows.map(r => +r[COL.match]||0).filter(v=>v);
-
-  document.getElementById("sTot").textContent   = n;
-  document.getElementById("sStep").textContent  = avg(steps).toFixed(1);
-  document.getElementById("sTemp").innerHTML    = avg(temps).toFixed(1)+'<span class="stat-unit">°C</span>';
-  document.getElementById("sMatch").innerHTML   = avg(matchs).toFixed(0)+'<span class="stat-unit">%</span>';
-
-  // 단계 분포
-  const stepDist = [0,0,0,0,0];
-  steps.forEach(s => { if(s>=1&&s<=5) stepDist[s-1]++; });
+function renderAll(rows){
+  const steps=rows.map(r=>+r[COL.step]||0).filter(v=>v);
+  const temps=rows.map(r=>+r[COL.temp]||0).filter(v=>v>=0);
+  const matchs=rows.map(r=>+r[COL.match]||0).filter(v=>v);
+  document.getElementById("sTot").textContent=rows.length;
+  document.getElementById("sStep").textContent=avg(steps).toFixed(1);
+  document.getElementById("sTemp").innerHTML=avg(temps).toFixed(1)+'<span class="stat-unit">°C</span>';
+  document.getElementById("sMatch").innerHTML=avg(matchs).toFixed(0)+'<span class="stat-unit">%</span>';
+  const stepDist=[0,0,0,0,0];
+  steps.forEach(s=>{if(s>=1&&s<=5)stepDist[s-1]++;});
   renderStep(stepDist);
-
-  // 온도 분포 (5구간)
-  const tempBins = [0,0,0,0,0]; // 0-9, 10-18, 19-27, 28-36, 37-45
-  temps.forEach(t => {
-    if(t<=9) tempBins[0]++;
-    else if(t<=18) tempBins[1]++;
-    else if(t<=27) tempBins[2]++;
-    else if(t<=36) tempBins[3]++;
-    else tempBins[4]++;
-  });
+  const tempBins=[0,0,0,0,0];
+  temps.forEach(t=>{if(t<=9)tempBins[0]++;else if(t<=18)tempBins[1]++;else if(t<=27)tempBins[2]++;else if(t<=36)tempBins[3]++;else tempBins[4]++;});
   renderTemp(tempBins);
-
-  // 사후설문 섹션 평균
-  // A: pQ1-5 (col 35-39), B: pQ6-12 (col 40-46), C: pQ13-18 (col 47-52), D: pQ19-25 (col 53-59)
-  const secRanges = [[1,5],[6,12],[13,18],[19,25]];
-  const secAvgs = secRanges.map(([start,end]) => {
-    const vals = [];
-    rows.forEach(row => {
-      for(let q=start; q<=end; q++){
-        const colIdx = COL.postStart + q - 1;
-        const v = postScore(row[colIdx], q);
-        if(v>0) vals.push(v);
-      }
-    });
+  const secRanges=[[1,5],[6,12],[13,18],[19,25]];
+  const secAvgs=secRanges.map(([start,end])=>{
+    const vals=[];
+    rows.forEach(row=>{for(let q=start;q<=end;q++){const v=postScore(row[COL.postStart+q-1],q);if(v>0)vals.push(v);}});
     return avg(vals);
   });
   renderPost(secAvgs);
-
-  // 준비도 유형 분류
-  // 내적 준비도: Q14(col5+13=18), Q15(col5+14=19), Q8(col5+7=12), Q1(col5+0=5), Q10(col5+9=14), Q12(col5+11=16)
-  // 실제 감각Q 컬럼 위치: col 5 = Q1, col6=Q2, ... 순서는 sIds 배열 기준
-  const sIds = COL.sIds;
-  function getSensQCol(qId) { return 5 + sIds.indexOf(qId); }
-
-  const types = {mt1:0,mt2:0,mt3:0,mt4:0};
-  rows.forEach(row => {
-    // 내적 준비도: Q14, Q15, Q8 평균 (높을수록 좋음)
-    const innerIds = [14,15,8,1,10,12];
-    const innerVals = innerIds.map(id => { const c=getSensQCol(id); return c>=0?(+row[c]||0):0; }).filter(v=>v>0);
-    const innerAvg = avg(innerVals); // 1-3 scale, 중간=2
-
-    // 외적 압력: Q13 (원래값, 높을수록 압력 높음 — 역문항이지만 원시값 사용)
-    const q13col = getSensQCol(13);
-    const externalRaw = q13col>=0 ? (+row[q13col]||2) : 2;
-
-    const innerHigh = innerAvg >= 2;
-    const externalHigh = externalRaw >= 2;
-
-    if(innerHigh && !externalHigh) types.mt1++;
-    else if(innerHigh && externalHigh) types.mt2++;
-    else if(!innerHigh && !externalHigh) types.mt3++;
+  const sIds=COL.sIds;
+  function getSensQCol(qId){return 5+sIds.indexOf(qId);}
+  const types={mt1:0,mt2:0,mt3:0,mt4:0};
+  rows.forEach(row=>{
+    const innerIds=[14,15,8,1,10,12];
+    const innerVals=innerIds.map(id=>{const c=getSensQCol(id);return c>=0?(+row[c]||0):0;}).filter(v=>v>0);
+    const innerAvg=avg(innerVals);
+    const q13col=getSensQCol(13);
+    const externalRaw=q13col>=0?(+row[q13col]||2):2;
+    const innerHigh=innerAvg>=2,externalHigh=externalRaw>=2;
+    if(innerHigh&&!externalHigh)types.mt1++;
+    else if(innerHigh&&externalHigh)types.mt2++;
+    else if(!innerHigh&&!externalHigh)types.mt3++;
     else types.mt4++;
   });
-  ["mt1","mt2","mt3","mt4"].forEach(k => {
-    document.getElementById(k+"v").textContent = types[k]+"명";
-  });
-
-  // 테이블
+  ["mt1","mt2","mt3","mt4"].forEach(k=>{document.getElementById(k+"v").textContent=types[k]+"명";});
   renderTable(rows);
 }
 
-function renderStep(dist) {
-  if(charts.step) charts.step.destroy();
-  const ctx = document.getElementById("stepChart").getContext("2d");
-  charts.step = new Chart(ctx, {
-    type:"bar",
-    data:{
-      labels:["1단계","2단계","3단계","4단계","5단계"],
-      datasets:[{
-        data: dist,
-        backgroundColor: STEP_COLORS.map(c=>c+"99"),
-        borderColor: STEP_COLORS,
-        borderWidth: 1,
-        borderRadius: 6,
-      }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},
-        y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11},stepSize:1},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}
-      }
-    }
-  });
+function renderStep(dist){
+  if(charts.step)charts.step.destroy();
+  const ctx=document.getElementById("stepChart").getContext("2d");
+  charts.step=new Chart(ctx,{type:"bar",data:{labels:["1단계","2단계","3단계","4단계","5단계"],datasets:[{data:dist,backgroundColor:STEP_COLORS.map(c=>c+"99"),borderColor:STEP_COLORS,borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11},stepSize:1},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}}}});
 }
-
-function renderTemp(bins) {
-  if(charts.temp) charts.temp.destroy();
-  const ctx = document.getElementById("tempChart").getContext("2d");
-  charts.temp = new Chart(ctx, {
-    type:"bar",
-    data:{
-      labels:["0–9°C","10–18°C","19–27°C","28–36°C","37–45°C"],
-      datasets:[{
-        data: bins,
-        backgroundColor:["#b8dcec99","#b8dcec99","#f4ccb199","#f4ccb199","#D85A3099"],
-        borderColor:["#b8dcec","#b8dcec","#f4ccb1","#f4ccb1","#D85A30"],
-        borderWidth:1,
-        borderRadius:6,
-      }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:10}},grid:{color:"rgba(255,255,255,.06)"}},
-        y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11},stepSize:1},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}
-      }
-    }
-  });
+function renderTemp(bins){
+  if(charts.temp)charts.temp.destroy();
+  const ctx=document.getElementById("tempChart").getContext("2d");
+  charts.temp=new Chart(ctx,{type:"bar",data:{labels:["0–9°C","10–18°C","19–27°C","28–36°C","37–45°C"],datasets:[{data:bins,backgroundColor:["#b8dcec99","#b8dcec99","#f4ccb199","#f4ccb199","#D85A3099"],borderColor:["#b8dcec","#b8dcec","#f4ccb1","#f4ccb1","#D85A30"],borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"rgba(255,250,243,.5)",font:{size:10}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11},stepSize:1},grid:{color:"rgba(255,255,255,.06)"},beginAtZero:true}}}});
 }
-
-function renderPost(avgs) {
-  if(charts.post) charts.post.destroy();
-  const ctx = document.getElementById("postChart").getContext("2d");
-  charts.post = new Chart(ctx, {
-    type:"bar",
-    data:{
-      labels:["A. 사전설문 경험","B. 비언어 피드백","C. AI 분석 인식","D. 매칭 경험"],
-      datasets:[{
-        data: avgs.map(v=>+v.toFixed(2)),
-        backgroundColor: SEC_COLORS.map(c=>c+"99"),
-        borderColor: SEC_COLORS,
-        borderWidth:1,
-        borderRadius:6,
-      }]
-    },
-    options:{
-      indexAxis:"y",
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{min:1,max:5,ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},
-        y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{display:false}}
-      }
-    }
-  });
+function renderPost(avgs){
+  if(charts.post)charts.post.destroy();
+  const ctx=document.getElementById("postChart").getContext("2d");
+  charts.post=new Chart(ctx,{type:"bar",data:{labels:["A. 사전설문 경험","B. 비언어 피드백","C. AI 분석 인식","D. 매칭 경험"],datasets:[{data:avgs.map(v=>+v.toFixed(2)),backgroundColor:SEC_COLORS.map(c=>c+"99"),borderColor:SEC_COLORS,borderWidth:1,borderRadius:6}]},options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:1,max:5,ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:"rgba(255,250,243,.5)",font:{size:11}},grid:{display:false}}}}});
 }
-
-function stepBadgeColor(s){
-  return["#378ADD","#7F77DD","#1D9E75","#f0b87a","#D85A30"][s-1]||"#aaa";
+function stepBadgeColor(s){return["#378ADD","#7F77DD","#1D9E75","#f0b87a","#D85A30"][s-1]||"#aaa";}
+function renderTable(rows){
+  if(!rows.length){document.getElementById("tableArea").innerHTML='<div class="empty">아직 응답 데이터가 없습니다.</div>';return;}
+  const html=`<div class="table-wrap"><table><thead><tr><th>#</th><th>시각</th><th>단계</th><th>온도</th><th>매칭률</th><th>점수</th><th>A 사전설문</th><th>B 비언어</th><th>C AI분석</th><th>D 매칭</th></tr></thead><tbody>${rows.map((row,i)=>{
+    const step=+row[1]||0,temp=+row[2]||0,match=+row[3]||0,score=+row[4]||0;
+    const ts=row[0]?new Date(row[0]).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
+    const c=stepBadgeColor(step);
+    function secAvg(start,end){const vals=[];for(let q=start;q<=end;q++){const v=postScore(row[COL.postStart+q-1],q);if(v>0)vals.push(v);}return vals.length?avg(vals).toFixed(1):"—";}
+    return `<tr><td style="color:rgba(255,250,243,.4);font-family:monospace">${i+1}</td><td style="color:rgba(255,250,243,.5);font-size:11px">${ts}</td><td><span class="badge" style="background:${c}22;color:${c}">${step}단계</span></td><td style="font-family:monospace">${temp}°C</td><td style="font-family:monospace">${match}%</td><td style="font-family:monospace;color:rgba(255,250,243,.5)">${score}</td><td style="font-family:monospace">${secAvg(1,5)}</td><td style="font-family:monospace">${secAvg(6,12)}</td><td style="font-family:monospace">${secAvg(13,18)}</td><td style="font-family:monospace">${secAvg(19,25)}</td></tr>`;
+  }).join("")}</tbody></table></div>`;
+  document.getElementById("tableArea").innerHTML=html;
 }
-
-function renderTable(rows) {
-  if(!rows.length){ document.getElementById("tableArea").innerHTML='<div class="empty">아직 응답 데이터가 없습니다.</div>'; return; }
-  const html = `
-  <div class="table-wrap">
-  <table>
-    <thead><tr>
-      <th>#</th><th>시각</th><th>단계</th><th>온도</th><th>매칭률</th><th>점수</th>
-      <th>A 사전설문</th><th>B 비언어</th><th>C AI분석</th><th>D 매칭</th>
-    </tr></thead>
-    <tbody>
-    ${rows.map((row,i)=>{
-      const step=+row[1]||0, temp=+row[2]||0, match=+row[3]||0, score=+row[4]||0;
-      const ts = row[0] ? new Date(row[0]).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
-      const c = stepBadgeColor(step);
-      // 사후 섹션 평균
-      function secAvg(start,end){
-        const vals=[];
-        for(let q=start;q<=end;q++){
-          const v=postScore(row[COL.postStart+q-1],q);
-          if(v>0) vals.push(v);
-        }
-        return vals.length?avg(vals).toFixed(1):"—";
-      }
-      return `<tr>
-        <td style="color:rgba(255,250,243,.4);font-family:monospace">${i+1}</td>
-        <td style="color:rgba(255,250,243,.5);font-size:11px">${ts}</td>
-        <td><span class="badge" style="background:${c}22;color:${c}">${step}단계</span></td>
-        <td style="font-family:monospace">${temp}°C</td>
-        <td style="font-family:monospace">${match}%</td>
-        <td style="font-family:monospace;color:rgba(255,250,243,.5)">${score}</td>
-        <td style="font-family:monospace">${secAvg(1,5)}</td>
-        <td style="font-family:monospace">${secAvg(6,12)}</td>
-        <td style="font-family:monospace">${secAvg(13,18)}</td>
-        <td style="font-family:monospace">${secAvg(19,25)}</td>
-      </tr>`;
-    }).join("")}
-    </tbody>
-  </table>
-  </div>`;
-  document.getElementById("tableArea").innerHTML = html;
-}
-
-// Chart.js 기본 색상 설정
-Chart.defaults.color = "rgba(255,250,243,.5)";
-
+Chart.defaults.color="rgba(255,250,243,.5)";
 loadData();
 </script>
 </body>

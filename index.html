@@ -50,6 +50,7 @@ body{overflow:hidden}button{border:0;color:inherit;font:inherit;cursor:pointer}
 .pcard{display:grid;gap:12px;padding:16px;border-radius:14px;margin-bottom:10px}.pq{font-size:15px;line-height:1.55;word-break:keep-all;color:var(--fg)}.prev-note{font-size:10px;color:var(--muted);margin-top:-6px;letter-spacing:.04em}
 .likert{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.lopt{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;-webkit-user-select:none;user-select:none}.lopt input{display:none}.lcircle{width:100%;aspect-ratio:1;border-radius:50%;border:0.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:rgba(255,250,243,.5);transition:all .15s;font-family:monospace;max-width:52px}.lopt input:checked~.lcircle{background:color-mix(in srgb,var(--b) 38%,rgba(255,255,255,.2));border-color:rgba(255,255,255,.5);color:#fffaf3}.lopt.rev input:checked~.lcircle{background:color-mix(in srgb,#D85A30 38%,rgba(255,255,255,.1));border-color:rgba(255,100,50,.6);color:#fffaf3}.lword{font-size:9px;color:rgba(255,250,243,.36);text-align:center;line-height:1.3;max-width:46px}
 .pnav{display:grid;gap:8px;padding:14px 0 2px}
+.sel-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}.sel-btn{padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.075);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);color:rgba(255,250,243,.72);font-size:13px;cursor:pointer;transition:all .15s}.sel-btn.sel{background:color-mix(in srgb,var(--b) 22%,rgba(255,255,255,.16));box-shadow:inset 0 0 0 1px rgba(255,255,255,.38);color:#fffaf3}
 .done-screen{gap:0;overflow-y:auto;text-align:center}.done-inner{display:grid;justify-items:center;gap:18px;padding-top:20px}.done-icon{font-size:52px;opacity:.9}.done-title{font-size:clamp(28px,8vw,48px);font-weight:300;line-height:1.1}.done-sub{color:var(--muted);font-size:14px;line-height:1.65;max-width:280px;word-break:keep-all}
 .sec-score{background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px var(--line);backdrop-filter:blur(18px);border-radius:12px;padding:12px;margin-bottom:8px;width:100%;max-width:320px}.ssl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}.ssbar{display:flex;align-items:center;gap:10px}.sst{flex:1;height:5px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden}.ssf{height:100%;border-radius:99px;width:0%;transition:width .9s cubic-bezier(.4,0,.2,1)}.ssv{font-family:monospace;font-size:12px;color:var(--fg);min-width:24px;text-align:right}
 @keyframes drift{to{transform:translate3d(6vmax,-4vmax,0) scale(1.08)}}@keyframes pulse{0%{opacity:.72;transform:translate(-50%,-50%) scale(.34)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}@media(min-width:760px){.top,.wrap,.pwrap,.ewrap{max-width:720px}.list{grid-template-columns:repeat(2,1fr)}.card{min-height:190px;align-content:space-between}}@media(max-width:360px){.screen{padding-left:16px;padding-right:16px}.ans,.lcircle{font-size:12px}.orb{width:min(70vw,250px)}}
@@ -150,7 +151,7 @@ body{overflow:hidden}button{border:0;color:inherit;font:inherit;cursor:pointer}
 </section>
 
 <section class="screen post hidden" id="postScreen">
-  <div class="top"><button class="ghost" id="postBack">←</button><span class="eye">AFTER CHECK · 25 Q</span><button class="ghost" id="postReset">↺</button></div>
+  <div class="top"><button class="ghost" id="postBack">←</button><span class="eye">AFTER CHECK · 27 Q</span><button class="ghost" id="postReset">↺</button></div>
   <div class="pwrap">
     <div class="phero">
       <h2>경험을<br>기록합니다</h2>
@@ -274,7 +275,7 @@ const POST_SECS=[
 ];
 
 const bands={1:[0,18,0,9,41,52],2:[19,36,9,18,53,63],3:[37,54,18,27,64,75],4:[55,72,27,36,76,86],5:[73,90,36,45,87,96]};
-let ans={}, postAns={}, result=null;
+let ans={}, postAns={}, result=null, demographic={gender:null,age:null};
 const $=id=>document.getElementById(id), clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), lerp=(a,b,t)=>a+(b-a)*t;
 
 function pulse(e,s=1){let p=$("pulse"),x=e?.clientX??innerWidth/2,y=e?.clientY??innerHeight/2;p.style.left=x+"px";p.style.top=y+"px";p.style.width=140+s*42+"px";p.style.height=140+s*42+"px";p.classList.remove("on");void p.offsetWidth;p.classList.add("on")}
@@ -377,7 +378,7 @@ function showExplain(){
 
 function back(){haptic("light");$("result").classList.add("hidden");survey.classList.remove("hidden")}
 function resetAll(){
-  ans={};postAns={};result=null;
+  ans={};postAns={};result=null;demographic={gender:null,age:null};
   document.querySelectorAll(".ans").forEach(b=>b.classList.remove("sel"));
   document.querySelectorAll(".lopt input").forEach(i=>i.checked=false);
   progress();updatePostProgress();
@@ -389,6 +390,36 @@ function resetAll(){
 
 function renderPost(){
   const container=$("postList");container.innerHTML="";
+
+  // ── 인적사항 섹션
+  const demoDiv=document.createElement("div");
+  demoDiv.style.marginBottom="20px";
+  demoDiv.innerHTML=`<p class="psec-label">인적사항</p>
+    <div class="pcard">
+      <p class="pq">성별</p>
+      <div class="sel-group" id="genderGroup">
+        ${["남성","여성","논바이너리","답하지 않음"].map(v=>`<button class="sel-btn" data-demo="gender" data-val="${v}">${v}</button>`).join("")}
+      </div>
+    </div>
+    <div class="pcard">
+      <p class="pq">연령대</p>
+      <div class="sel-group" id="ageGroup">
+        ${["20대 초반","20대 후반","30대 초반","30대 후반","40대 이상"].map(v=>`<button class="sel-btn" data-demo="age" data-val="${v}">${v}</button>`).join("")}
+      </div>
+    </div>`;
+  container.appendChild(demoDiv);
+
+  // 버튼 이벤트
+  demoDiv.querySelectorAll(".sel-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const key=btn.dataset.demo;
+      demoDiv.querySelectorAll(`[data-demo="${key}"]`).forEach(b=>b.classList.remove("sel"));
+      btn.classList.add("sel");
+      demographic[key]=btn.dataset.val;
+      updatePostProgress();
+      haptic("selection");
+    });
+  });
   POST_SECS.forEach(sec=>{
     const secDiv=document.createElement("div");
     secDiv.style.marginBottom="20px";
@@ -418,8 +449,11 @@ function renderPost(){
 const TOTAL_POST=25;
 function updatePostProgress(){
   const n=Object.keys(postAns).length;
-  postDone.disabled=n!==TOTAL_POST;
-  postHint.textContent=n===TOTAL_POST?"모든 문항에 응답했습니다. 완료할 수 있습니다.":`남은 문항 ${TOTAL_POST-n}개`;
+  const demoOk=demographic.gender&&demographic.age;
+  const total=TOTAL_POST+2;
+  const filled=n+(demoOk?2:demographic.gender||demographic.age?1:0);
+  postDone.disabled=!(n===TOTAL_POST&&demoOk);
+  postHint.textContent=(n===TOTAL_POST&&demoOk)?"모든 문항에 응답했습니다. 완료할 수 있습니다.":`남은 문항 ${total-filled}개`;
 }
 function goToPost(){
   haptic("light");
@@ -436,7 +470,8 @@ function sendToSheets(){
     body:JSON.stringify({
       timestamp:new Date().toISOString(),
       sensory:{answers:ans,step:result.step,temp:result.temp,match:result.match,score:result.score},
-      post:postAns
+      post:postAns,
+      demographic:demographic
     })
   }).catch(err=>console.warn("Sheets 전송 실패:",err));
 }

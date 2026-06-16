@@ -185,10 +185,10 @@ function loadData(){
   const old=document.getElementById("_jsonp_script");
   if(old)old.remove();
   const s=document.createElement("script");
-  s.id="_jsonp_script";
-  s.src=SHEETS_URL+"?action=getData&callback=onData&t="+Date.now();
-  s.onerror=()=>showError("스크립트 로드 실패");
-  document.head.appendChild(s);
+  s.id = "_jsonp_script";
+        s.src = SHEETS_URL + "?action=getData" + "&" + "callback=onData" + "&" + "t=" + Date.now();
+        s.onerror = () => showError("스크립트 로드 실패");
+        document.head.appendChild(s);
 }
 
 function onData(json){
